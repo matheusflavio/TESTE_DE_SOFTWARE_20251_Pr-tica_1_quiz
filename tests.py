@@ -115,3 +115,53 @@ def test_removing_invalid_choice_id_should_raise_exception():
     
     with pytest.raises(Exception):
         question.remove_choice_by_id(999)
+
+@pytest.fixture
+def questao_multipla_escolha():
+    questao = Question(title='Quais são linguagens de programação?', max_selections=3, points=10)
+    questao.add_choice('Python', True)
+    questao.add_choice('HTML', False)
+    questao.add_choice('Java', True)
+    questao.add_choice('CSS', False)
+    questao.add_choice('JavaScript', True)
+    return questao
+
+@pytest.fixture
+def questao_com_pontuacao_maxima():
+    questao = Question(title='Questão Difícil', points=100)
+    questao.add_choice('Resposta A', False)
+    questao.add_choice('Resposta B', True)
+    return questao
+
+def test_deve_identificar_todas_respostas_corretas(questao_multipla_escolha):
+    respostas_corretas = questao_multipla_escolha._correct_choice_ids()
+    
+    # Deve haver exatamente 3 respostas corretas (Python, Java e JavaScript)
+    assert len(respostas_corretas) == 3
+    
+    # Verifica se as escolhas corretas são as esperadas
+    escolhas_corretas = [choice for choice in questao_multipla_escolha.choices if choice.is_correct]
+    assert 'Python' in [choice.text for choice in escolhas_corretas]
+    assert 'Java' in [choice.text for choice in escolhas_corretas]
+    assert 'JavaScript' in [choice.text for choice in escolhas_corretas]
+
+def test_deve_permitir_selecao_parcial_de_respostas_corretas(questao_multipla_escolha):
+    # Seleciona apenas 2 das 3 respostas corretas
+    escolhas_corretas = [choice.id for choice in questao_multipla_escolha.choices if choice.is_correct][:2]
+    
+    respostas_selecionadas = questao_multipla_escolha.select_choices(escolhas_corretas)
+    
+    assert len(respostas_selecionadas) == 2
+    assert all(id in escolhas_corretas for id in respostas_selecionadas)
+
+def test_deve_manter_pontuacao_ao_modificar_escolhas(questao_com_pontuacao_maxima):
+    pontuacao_original = questao_com_pontuacao_maxima.points
+    
+    # Modifica as escolhas
+    questao_com_pontuacao_maxima.remove_all_choices()
+    questao_com_pontuacao_maxima.add_choice('Nova Resposta A', True)
+    questao_com_pontuacao_maxima.add_choice('Nova Resposta B', False)
+    
+    # Verifica se a pontuação permanece a mesma
+    assert questao_com_pontuacao_maxima.points == pontuacao_original
+    assert questao_com_pontuacao_maxima.points == 100

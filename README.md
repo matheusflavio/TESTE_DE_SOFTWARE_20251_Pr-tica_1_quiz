@@ -131,3 +131,7 @@ Com os testes passando, faça o commit com a seguinte mensagem: *Commit 3: Testi
 
 # Realização dos commits
 ## Commit 1: Running the tests.
+
+## Commit 2: Creating 10 unit tests.
+
+## Commit 3: Testing with fixtures.
